@@ -6,12 +6,24 @@ const ENDPOINTS = {
   REGISTER: `${CONFIG.BASE_URL}/register`,
 };
 
+// Helper function to get auth headers
+function getAuthHeaders() {
+  const token = localStorage.getItem('token');
+  return {
+    'Authorization': `Bearer ${token}`,
+  };
+}
+
 export async function getStories(page = 1, location = false) {
   const url = location 
     ? `${ENDPOINTS.STORIES}?page=${page}&location=true`
     : `${ENDPOINTS.STORIES}?page=${page}`;
     
-  const fetchResponse = await fetch(url);
+  const fetchResponse = await fetch(url, {
+    method: 'GET',
+    headers: getAuthHeaders(),
+  });
+  
   return await fetchResponse.json();
 }
 
@@ -22,13 +34,9 @@ export async function addStory({ description, lat, lon, photo }) {
   formData.append('lon', lon);
   formData.append('photo', photo);
 
-  const token = localStorage.getItem('token');
-  
   const response = await fetch(ENDPOINTS.STORIES, {
     method: 'POST',
-    headers: {
-      'Authorization': `Bearer ${token}`,
-    },
+    headers: getAuthHeaders(),
     body: formData,
   });
   
