@@ -216,8 +216,8 @@ class PushNotificationManager {
 
     const notificationOptions = {
       body: options.body || 'You have a new notification',
-      icon: options.icon || '/favicon.png',
-      badge: options.badge || '/favicon.png',
+      icon: options.icon || `${import.meta.env.BASE_URL}favicon.png`,
+      badge: options.badge || `${import.meta.env.BASE_URL}favicon.png`,
       tag: options.tag || 'default',
       renotify: options.renotify || false,
       requireInteraction: options.requireInteraction || false,

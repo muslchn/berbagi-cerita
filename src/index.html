@@ -3,10 +3,10 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html;charset=UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="shortcut icon" href="/favicon.png" />
+    <link rel="shortcut icon" href="%BASE_URL%favicon.png" />
     
     <!-- PWA Manifest -->
-    <link rel="manifest" href="/manifest.json" />
+    <link rel="manifest" href="%BASE_URL%manifest.json" />
     
     <!-- Theme Color for PWA -->
     <meta name="theme-color" content="#2c3e50" />
@@ -15,7 +15,7 @@
     
     <title>Berbagi Cerita - Aplikasi Berbagi Pengalaman</title>
 
-    <script type="module" src="/scripts/index.js"></script>
+    <script type="module" src="%BASE_URL%scripts/index.js"></script>
   </head>
   <body>
     <a href="#main-content" class="skip-link">Skip to main content</a>
@@ -49,10 +49,10 @@
     </footer>
 
     <!-- Service Worker Registration -->
-    <script>
+    <script type="module">
       if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
-          navigator.serviceWorker.register('/sw.js')
+          navigator.serviceWorker.register(`${import.meta.env.BASE_URL}sw.js`)
             .then((registration) => {
               console.log('[PWA] Service Worker registered:', registration.scope);
               

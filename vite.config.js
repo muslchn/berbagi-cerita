@@ -4,6 +4,7 @@ import fs from 'fs';
 
 // https://vitejs.dev/config/
 export default defineConfig({
+  base: './',
   root: resolve(__dirname, 'src'),
   publicDir: resolve(__dirname, 'public'), // Changed to root public directory for manifest.json
   build: {

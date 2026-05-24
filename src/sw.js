@@ -4,12 +4,13 @@
  */
 
 const CACHE_NAME = 'berbagi-cerita-v1';
+const BASE_URL = new URL('./', self.location).href;
 const STATIC_ASSETS = [
-  '/',
-  '/index.html',
-  '/scripts/index.js',
-  '/styles/styles.css',
-  '/favicon.png'
+  BASE_URL,
+  new URL('index.html', self.location).href,
+  new URL('scripts/index.js', self.location).href,
+  new URL('styles/styles.css', self.location).href,
+  new URL('favicon.png', self.location).href
 ];
 
 const API_CACHE_NAME = 'berbagi-cerita-api-v1';
@@ -151,7 +152,7 @@ async function handleStaticRequest(request) {
   } catch (error) {
     // Return offline page for navigation requests
     if (request.mode === 'navigate') {
-      return caches.match('/index.html');
+      return caches.match(new URL('index.html', self.location).href);
     }
     throw error;
   }
@@ -172,8 +173,8 @@ self.addEventListener('push', (event) => {
   const title = data.title || 'Berbagi Cerita';
   const options = {
     body: data.options?.body || 'Anda memiliki notifikasi baru',
-    icon: data.options?.icon || '/favicon.png',
-    badge: '/favicon.png',
+    icon: data.options?.icon || new URL('favicon.png', self.location).href,
+    badge: new URL('favicon.png', self.location).href,
     tag: data.options?.tag || 'story-notification',
     renotify: true,
     requireInteraction: false,
@@ -183,7 +184,7 @@ self.addEventListener('push', (event) => {
     ],
     data: {
       storyId: data.options?.data?.id || null,
-      url: data.options?.data?.url || '/#/'
+      url: data.options?.data?.url || `${BASE_URL}#/`
     }
   };
 
@@ -200,7 +201,7 @@ self.addEventListener('notificationclick', (event) => {
 
   if (event.action === 'view') {
     const storyId = event.notification.data.storyId;
-    const url = storyId ? `/#/story/${storyId}` : event.notification.data.url || '/#/';
+    const url = storyId ? `${BASE_URL}#/story/${storyId}` : event.notification.data.url || `${BASE_URL}#/`;
     
     event.waitUntil(
       clients.openWindow(url)
@@ -210,7 +211,7 @@ self.addEventListener('notificationclick', (event) => {
   } else {
     // Default action - open app
     event.waitUntil(
-      clients.openWindow('/#/')
+      clients.openWindow(`${BASE_URL}#/`)
     );
   }
 });
