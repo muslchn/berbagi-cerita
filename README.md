@@ -188,10 +188,38 @@ const CONFIG = {
 - Token otomatis disertakan di header Authorization untuk setiap request ke `/stories`
 - Token dihapus saat logout (jika diimplementasikan)
 
+### Accessibility Features
+- **Skip to Content:** Link tersembunyi yang muncul saat Tab pertama kali ditekan
+  - Langsung memindahkan fokus ke konten utama tanpa mengubah URL
+  - Implementasi menggunakan JavaScript event handler (bukan pure HTML anchor)
+- **Heading Hierarchy:** Struktur heading hierarkis (h1 → h2 → h3) untuk screen readers
+  - Heading section disembunyikan secara visual tapi tetap semantic
+  - Menggunakan "visually hidden" pattern untuk accessibility
+
 ### Performance Considerations
 - Images menggunakan `loading="lazy"` untuk lazy loading
 - Leaflet.js dimuat secara dinamis hanya saat halaman peta diakses
 - Dynamic imports untuk optimasi bundle size
+
+### Troubleshooting Common Issues
+
+#### Error "Missing authentication" saat mengambil stories
+**Solusi:** Pastikan sudah login dan token tersimpan di localStorage. Cek di DevTools → Application → Local Storage.
+
+#### Kamera tidak berfungsi
+**Solusi:** 
+- Pastikan menggunakan HTTPS atau localhost
+- Izinkan akses kamera di browser settings
+- Coba gunakan browser modern (Chrome, Firefox, Edge terbaru)
+
+#### Skip link tidak bekerja
+**Solusi:** Pastikan JavaScript enabled di browser. Skip link memerlukan event handler untuk mencegah navigasi hash.
+
+#### Peta tidak muncul
+**Solusi:** 
+- Periksa koneksi internet (Leaflet.js dimuat dari CDN)
+- Clear browser cache dan reload
+- Cek console untuk error messages
 
 ## 🎯 Kriteria Submission Checklist
 

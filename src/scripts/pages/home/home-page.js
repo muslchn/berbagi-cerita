@@ -7,6 +7,8 @@ export default class HomePage {
         <h1 class="page-title">Berbagi Cerita</h1>
         <p class="page-subtitle">Temukan cerita dari berbagai tempat</p>
         
+        <h2 class="stories-heading">Daftar Cerita Terbaru</h2>
+        
         <div id="stories-list" class="stories-list">
           <p class="loading-text">Memuat cerita...</p>
         </div>

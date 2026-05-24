@@ -29,6 +29,16 @@ body {
   top: 0;
 }
 
+/* Stories heading for accessibility hierarchy */
+.stories-heading {
+  position: absolute !important;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(1px, 1px, 1px, 1px);
+  white-space: nowrap;
+}
+
 .container {
   padding-inline: 32px;
   margin-inline: auto;
