@@ -1,4 +1,5 @@
 import { addStory } from '../../data/api';
+import storyDB from '../../data/indexeddb';
 
 export default class AddStoryPage {
   async render() {
@@ -6,6 +7,10 @@ export default class AddStoryPage {
       <section class="container add-story-container">
         <h1 class="page-title">Tambah Cerita Baru</h1>
         <p class="page-subtitle">Bagikan pengalaman Anda</p>
+        
+        <div id="sync-status" style="background: #d4edda; color: #155724; padding: 0.75rem; border-radius: 4px; margin-bottom: 1rem; display: none;">
+          ✓ Online - Data akan langsung disimpan ke server
+        </div>
         
         <form id="add-story-form" class="story-form" enctype="multipart/form-data">
           <div class="form-group">
@@ -92,6 +97,12 @@ export default class AddStoryPage {
           
           <button type="submit" class="btn-primary">Tambah Cerita</button>
         </form>
+        
+        <div id="pending-sync-section" style="margin-top: 2rem; display: none;">
+          <h3>Cerita Pending (Offline)</h3>
+          <p style="color: #7f8c8d; font-size: 0.9rem;">Cerita berikut akan disinkronkan saat kembali online:</p>
+          <ul id="pending-stories-list" style="list-style: none; padding: 0;"></ul>
+        </div>
       </section>
     `;
   }
@@ -104,6 +115,9 @@ export default class AddStoryPage {
       return;
     }
 
+    // Initialize IndexedDB
+    await storyDB.init();
+    
     // Load Leaflet CSS and JS dynamically
     const leafletCSS = document.createElement('link');
     leafletCSS.rel = 'stylesheet';
@@ -133,6 +147,92 @@ export default class AddStoryPage {
     // Setup retake button
     const retakeButton = document.getElementById('retake-button');
     retakeButton.addEventListener('click', () => this.retakePhoto());
+    
+    // Setup network listeners
+    this.setupNetworkListeners();
+    
+    // Display pending stories if any
+    await this.displayPendingStories();
+  }
+
+  setupNetworkListeners() {
+    const syncStatus = document.getElementById('sync-status');
+    
+    window.addEventListener('online', () => {
+      console.log('[AddStory] Back online');
+      if (syncStatus) {
+        syncStatus.style.display = 'block';
+        syncStatus.textContent = '✓ Online - Data akan langsung disimpan ke server';
+        syncStatus.style.background = '#d4edda';
+        syncStatus.style.color = '#155724';
+      }
+      
+      // Sync pending stories
+      this.syncPendingStories();
+    });
+    
+    window.addEventListener('offline', () => {
+      console.log('[AddStory] Went offline');
+      if (syncStatus) {
+        syncStatus.style.display = 'block';
+        syncStatus.textContent = '️ Offline - Data akan disimpan lokal dan disinkronkan nanti';
+        syncStatus.style.background = '#fff3cd';
+        syncStatus.style.color = '#856404';
+      }
+    });
+  }
+
+  async displayPendingStories() {
+    const pendingSection = document.getElementById('pending-sync-section');
+    const pendingList = document.getElementById('pending-stories-list');
+    
+    try {
+      const pendingStories = await storyDB.getPendingStories();
+      
+      if (pendingStories && pendingStories.length > 0) {
+        pendingSection.style.display = 'block';
+        pendingList.innerHTML = pendingStories.map(story => `
+          <li style="padding: 0.5rem; background: #f8f9fa; margin-bottom: 0.5rem; border-radius: 4px;">
+            <strong>${story.description.substring(0, 50)}...</strong>
+            <small style="color: #7f8c8d;"> - ${new Date(story.timestamp).toLocaleString('id-ID')}</small>
+          </li>
+        `).join('');
+      }
+    } catch (error) {
+      console.error('Error displaying pending stories:', error);
+    }
+  }
+
+  async syncPendingStories() {
+    try {
+      const pendingStories = await storyDB.getPendingStories();
+      
+      if (!pendingStories || pendingStories.length === 0) {
+        return;
+      }
+      
+      console.log(`[AddStory] Syncing ${pendingStories.length} pending stories...`);
+      
+      for (const pendingStory of pendingStories) {
+        try {
+          const result = await addStory(pendingStory.data);
+          
+          if (!result.error) {
+            // Remove from pending after successful sync
+            await storyDB.removePendingStory(pendingStory.timestamp);
+            console.log(`[AddStory] Successfully synced story ${pendingStory.timestamp}`);
+          }
+        } catch (error) {
+          console.error(`[AddStory] Failed to sync story ${pendingStory.timestamp}:`, error);
+        }
+      }
+      
+      // Refresh pending list display
+      await this.displayPendingStories();
+      
+    } catch (error) {
+      console.error('[AddStory] Error syncing pending stories:', error);
+    }
   }
 
   initializeMiniMap() {
@@ -274,26 +374,56 @@ export default class AddStoryPage {
       const lat = parseFloat(document.getElementById('latitude').value);
       const lon = parseFloat(document.getElementById('longitude').value);
       
-      const result = await addStory({ description, lat, lon, photo });
+      const storyData = { description, lat, lon, photo };
       
-      if (result.error) {
-        this.showMessage(`Gagal menambah cerita: ${result.message}`, 'error');
+      // Check if online
+      if (navigator.onLine) {
+        // Submit directly to API
+        const result = await addStory(storyData);
+        
+        if (result.error) {
+          this.showMessage(`Gagal menambah cerita: ${result.message}`, 'error');
+        } else {
+          this.showMessage('Cerita berhasil ditambahkan!', 'success');
+          
+          // Reset form
+          e.target.reset();
+          document.getElementById('latitude').value = '';
+          document.getElementById('longitude').value = '';
+          
+          // Redirect to home after 2 seconds
+          setTimeout(() => {
+            window.location.hash = '#/';
+          }, 2000);
+        }
       } else {
-        this.showMessage('Cerita berhasil ditambahkan!', 'success');
+        // Store in IndexedDB for later sync
+        await storyDB.addPendingStory(storyData);
+        
+        this.showMessage('Cerita disimpan offline. Akan disinkronkan saat kembali online.', 'success');
         
         // Reset form
         e.target.reset();
         document.getElementById('latitude').value = '';
         document.getElementById('longitude').value = '';
         
-        // Redirect to home after 2 seconds
-        setTimeout(() => {
-          window.location.hash = '#/';
-        }, 2000);
+        // Refresh pending list
+        await this.displayPendingStories();
       }
     } catch (error) {
       console.error('Error adding story:', error);
-      this.showMessage('Terjadi kesalahan saat menambah cerita', 'error');
+      
+      // If API fails, store in IndexedDB
+      if (navigator.onLine) {
+        try {
+          await storyDB.addPendingStory({ description, lat, lon, photo });
+          this.showMessage('Gagal mengirim ke server. Disimpan offline untuk sinkronisasi nanti.', 'info');
+        } catch (dbError) {
+          this.showMessage('Terjadi kesalahan saat menyimpan cerita', 'error');
+        }
+      } else {
+        this.showMessage('Terjadi kesalahan saat menyimpan cerita', 'error');
+      }
     } finally {
       submitButton.disabled = false;
       submitButton.textContent = 'Tambah Cerita';

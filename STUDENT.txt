@@ -1,2 +1,9 @@
 APP_URL=http://localhost:5173/
+DEPLOYMENT_URL=https://berbagi-cerita.dicoding.dev  # Ganti dengan URL deployment Anda setelah deploy
 MAP_SERVICE_API_KEY=Tidak diperlukan (menggunakan OpenStreetMap)
+
+PWA Features:
+- Service Worker: src/sw.js
+- Web App Manifest: public/manifest.json
+- IndexedDB: src/scripts/data/indexeddb.js
+- Push Notification: src/scripts/utils/push-notification.js
