@@ -1,5 +1,6 @@
 import { defineConfig } from 'vite';
 import { resolve } from 'path';
+import fs from 'fs';
 
 // https://vitejs.dev/config/
 export default defineConfig({
@@ -19,4 +20,19 @@ export default defineConfig({
       '@': resolve(__dirname, 'src'),
     },
   },
+  plugins: [
+    {
+      name: 'copy-service-worker',
+      closeBundle() {
+        // Copy sw.js from src to dist after build
+        const srcSw = resolve(__dirname, 'src/sw.js');
+        const distSw = resolve(__dirname, 'dist/sw.js');
+        
+        if (fs.existsSync(srcSw)) {
+          fs.copyFileSync(srcSw, distSw);
+          console.log('[Vite Plugin] Service Worker copied to dist/sw.js');
+        }
+      }
+    }
+  ]
 });
