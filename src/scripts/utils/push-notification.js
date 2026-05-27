@@ -62,6 +62,11 @@ class PushNotificationManager {
       throw new Error('Push notifications not supported');
     }
 
+    const token = localStorage.getItem('token');
+    if (!token) {
+      throw new Error('Silakan login terlebih dahulu untuk mengaktifkan notifikasi');
+    }
+
     const permission = await this.requestPermission();
     
     if (permission !== 'granted') {
@@ -78,7 +83,13 @@ class PushNotificationManager {
     this.subscription = subscription;
     
     // Send subscription to server
-    await this.sendSubscriptionToServer(subscription);
+    try {
+      await this.sendSubscriptionToServer(subscription);
+    } catch (error) {
+      await subscription.unsubscribe();
+      this.subscription = null;
+      throw error;
+    }
     
     return subscription;
   }
@@ -139,8 +150,7 @@ class PushNotificationManager {
     const token = localStorage.getItem('token');
     
     if (!token) {
-      console.warn('No auth token available for push subscription');
-      return;
+      throw new Error('Silakan login terlebih dahulu untuk mengaktifkan notifikasi');
     }
 
     try {

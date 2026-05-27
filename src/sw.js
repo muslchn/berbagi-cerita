@@ -10,6 +10,8 @@ const STATIC_ASSETS = [
   new URL('index.html', self.location).href,
   new URL('manifest.json', self.location).href,
   new URL('favicon.png', self.location).href,
+  new URL('images/icon-192.png', self.location).href,
+  new URL('images/logo.png', self.location).href,
 ];
 
 const API_CACHE_NAME = 'berbagi-cerita-api-v1';

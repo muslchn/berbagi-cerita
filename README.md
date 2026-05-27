@@ -66,7 +66,9 @@ berbagi-cerita/
 │   ├── public/
 │   │   ├── favicon.png                # Ikon aplikasi
 │   │   ├── manifest.json              # Web app manifest
-│   │   └── images/logo.png            # Asset publik
+│   │   └── images/
+│   │       ├── icon-192.png           # Ikon PWA 192px
+│   │       └── logo.png               # Ikon PWA 512px dan asset publik
 │   ├── scripts/
 │   │   ├── config.js                  # Konfigurasi API
 │   │   ├── index.js                   # Entry point aplikasi
