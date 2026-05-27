@@ -10,7 +10,7 @@ const VAPID_PUBLIC_KEY = 'BCCs2eonMI-6H2ctvFaWg-UYdDv387Vno_bzUzALpB442r2lCnsHmt
 class PushNotificationManager {
   constructor() {
     this.subscription = null;
-    this.isSupported = 'serviceWorker' in navigator && 'PushManager' in window;
+    this.isSupported = 'serviceWorker' in navigator && 'PushManager' in window && 'Notification' in window;
   }
 
   /**
@@ -74,6 +74,13 @@ class PushNotificationManager {
     }
 
     const registration = await navigator.serviceWorker.ready;
+    const existingSubscription = await registration.pushManager.getSubscription();
+
+    if (existingSubscription) {
+      this.subscription = existingSubscription;
+      await this.sendSubscriptionToServer(existingSubscription);
+      return existingSubscription;
+    }
     
     const subscription = await registration.pushManager.subscribe({
       userVisibleOnly: true,
@@ -107,11 +114,11 @@ class PushNotificationManager {
       return false;
     }
 
-    const result = await this.subscription.unsubscribe();
+    const activeSubscription = this.subscription;
+    await this.removeSubscriptionFromServer(activeSubscription);
+    const result = await activeSubscription.unsubscribe();
     
     if (result) {
-      // Remove subscription from server
-      await this.removeSubscriptionFromServer(this.subscription);
       this.subscription = null;
     }
     
@@ -154,6 +161,7 @@ class PushNotificationManager {
     }
 
     try {
+      const subscriptionJson = subscription.toJSON();
       const response = await fetch(`${CONFIG.BASE_URL}/notifications/subscribe`, {
         method: 'POST',
         headers: {
@@ -161,13 +169,11 @@ class PushNotificationManager {
           'Authorization': `Bearer ${token}`
         },
         body: JSON.stringify({
-          endpoint: subscription.endpoint,
+          endpoint: subscriptionJson.endpoint,
           keys: {
-            p256dh: subscription.getKey('p256dh') ? 
-              btoa(String.fromCharCode(...new Uint8Array(subscription.getKey('p256dh')))) : null,
-            auth: subscription.getKey('auth') ? 
-              btoa(String.fromCharCode(...new Uint8Array(subscription.getKey('auth')))) : null
-          }
+            p256dh: subscriptionJson.keys.p256dh,
+            auth: subscriptionJson.keys.auth,
+          },
         })
       });
 

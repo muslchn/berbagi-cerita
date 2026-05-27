@@ -6,8 +6,8 @@
 class StoryDatabase {
   constructor() {
     this.dbName = 'BerbagiCeritaDB';
-    this.dbVersion = 1;
-    this.storeName = 'stories';
+    this.dbVersion = 2;
+    this.storeName = 'savedStories';
     this.pendingStoreName = 'pendingStories';
     this.db = null;
   }
@@ -28,7 +28,7 @@ class StoryDatabase {
       request.onupgradeneeded = (event) => {
         const db = event.target.result;
 
-        // Create stories store
+        // Create saved stories store. Stories are saved only from explicit user actions.
         if (!db.objectStoreNames.contains(this.storeName)) {
           const storyStore = db.createObjectStore(this.storeName, { keyPath: 'id' });
           storyStore.createIndex('createdAt', 'createdAt', { unique: false });
@@ -48,11 +48,15 @@ class StoryDatabase {
   }
 
   /**
-   * Add or update a story in IndexedDB
+   * Add or update a user-saved story in IndexedDB
    * @param {Object} story - Story object to save
    */
-  async addStory(story) {
+  async saveStory(story) {
     await this.ensureInitialized();
+
+    if (!story?.id) {
+      throw new Error('Story id is required to save.');
+    }
     
     return new Promise((resolve, reject) => {
       const transaction = this.db.transaction([this.storeName], 'readwrite');
@@ -65,11 +69,18 @@ class StoryDatabase {
   }
 
   /**
-   * Get all stories from IndexedDB
+   * Backward-compatible alias for older page code.
+   */
+  async addStory(story) {
+    return this.saveStory(story);
+  }
+
+  /**
+   * Get all user-saved stories from IndexedDB
    * @param {Object} options - Filter and sort options
    * @returns {Array} Array of stories
    */
-  async getAllStories(options = {}) {
+  async getSavedStories(options = {}) {
     await this.ensureInitialized();
     
     return new Promise((resolve, reject) => {
@@ -120,11 +131,18 @@ class StoryDatabase {
   }
 
   /**
-   * Get a single story by ID
+   * Backward-compatible alias for older page code.
+   */
+  async getAllStories(options = {}) {
+    return this.getSavedStories(options);
+  }
+
+  /**
+   * Get a single user-saved story by ID
    * @param {string} id - Story ID
    * @returns {Object|null} Story object or null
    */
-  async getStoryById(id) {
+  async getSavedStoryById(id) {
     await this.ensureInitialized();
     
     return new Promise((resolve, reject) => {
@@ -138,10 +156,17 @@ class StoryDatabase {
   }
 
   /**
-   * Delete a story from IndexedDB
+   * Backward-compatible alias for older page code.
+   */
+  async getStoryById(id) {
+    return this.getSavedStoryById(id);
+  }
+
+  /**
+   * Delete a user-saved story from IndexedDB
    * @param {string} id - Story ID to delete
    */
-  async deleteStory(id) {
+  async deleteSavedStory(id) {
     await this.ensureInitialized();
     
     return new Promise((resolve, reject) => {
@@ -155,9 +180,16 @@ class StoryDatabase {
   }
 
   /**
-   * Clear all stories from IndexedDB
+   * Backward-compatible alias for older page code.
    */
-  async clearAllStories() {
+  async deleteStory(id) {
+    return this.deleteSavedStory(id);
+  }
+
+  /**
+   * Clear all user-saved stories from IndexedDB
+   */
+  async clearSavedStories() {
     await this.ensureInitialized();
     
     return new Promise((resolve, reject) => {
@@ -168,6 +200,13 @@ class StoryDatabase {
       request.onsuccess = () => resolve();
       request.onerror = () => reject(request.error);
     });
+  }
+
+  /**
+   * Backward-compatible alias for older page code.
+   */
+  async clearAllStories() {
+    return this.clearSavedStories();
   }
 
   /**

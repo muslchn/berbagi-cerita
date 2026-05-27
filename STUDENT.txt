@@ -1,6 +1,11 @@
 APP_NAME=Berbagi Cerita
 APP_TYPE=Single Page Application + Progressive Web App
 
+STUDENT_NAME=Muslichin
+DICODING_USERNAME=muslchn
+COURSE=Belajar Pengembangan Web Intermediate
+SUBMISSION=Proyek Kedua
+
 LOCAL_URL=http://localhost:5173/
 PRODUCTION_URL=https://muslchn.github.io/berbagi-cerita/
 REPOSITORY_URL=https://github.com/muslchn/berbagi-cerita
@@ -9,8 +14,10 @@ API_BASE_URL=https://story-api.dicoding.dev/v1
 MAP_SERVICE=OpenStreetMap and Esri World Imagery via Leaflet
 MAP_SERVICE_API_KEY=Not required
 
+INSTALL_COMMAND=npm install
+DEV_COMMAND=npm run dev
 BUILD_COMMAND=npm run build
-BUILD_OUTPUT=dist
+PREVIEW_COMMAND=npm run preview
 DEPLOYMENT=GitHub Pages via .github/workflows/deploy.yml
 
 PWA_MANIFEST=src/public/manifest.json
@@ -21,13 +28,23 @@ PUSH_NOTIFICATION_HELPER=src/scripts/utils/push-notification.js
 MAIN_FEATURES:
 - Register, login, logout, and protected routes
 - Story list from Dicoding Story API
+- Search and sort on the story list
 - Interactive map with story markers and multiple map layers
 - Add story form with description, photo upload, camera capture, and map location picker
-- Push notification subscribe and unsubscribe
+- Push notification subscribe and unsubscribe from navigation and About page
 - PWA installability with service worker and web app manifest
-- Offline app shell and cached story data
-- IndexedDB story cache, search, sort, and pending offline story queue
+- Offline app shell support
+- User-selected saved stories in IndexedDB
+- Saved stories page with delete action
+- Pending offline story queue for later sync
 
-TEST_ACCOUNT:
+INDEXEDDB_STORES:
+- savedStories: stories saved by explicit user action
+- pendingStories: stories waiting to be submitted when the app is online again
+
+REVIEWER_NOTES:
 - Register a new account from #/register if no prepared account is available.
-- Login is required before opening #/, #/map, and #/add.
+- Login is required before opening #/, #/map, #/add, and #/saved.
+- To test saved stories, click "Simpan Cerita" on the home page, then open #/saved.
+- To test push notification, login, enable notification from navigation or #/about, then add a new story.
+- To test offline behavior, open the app once, save at least one story, then enable offline mode from DevTools.

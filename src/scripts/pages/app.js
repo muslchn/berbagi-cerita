@@ -1,5 +1,6 @@
 import routes from '../routes/routes';
 import { getActiveRoute } from '../routes/url-parser';
+import pushManager from '../utils/push-notification';
 
 class App {
   #content = null;
@@ -48,6 +49,8 @@ class App {
     } else {
       authLinks.innerHTML = '<a href="#/login">Masuk</a>';
     }
+
+    this.#setupPushNotificationTools(Boolean(token));
     
     // Add event listener for logout
     const logoutLink = authLinks.querySelector('a[href="#/logout"]');
@@ -58,6 +61,58 @@ class App {
         this.#updateAuthLinks();
         window.location.hash = '#/';
       });
+    }
+  }
+
+  async #setupPushNotificationTools(isAuthenticated) {
+    const pushTools = document.getElementById('push-notification-tools');
+
+    if (!pushTools) {
+      return;
+    }
+
+    if (!isAuthenticated || !pushManager.checkSupport()) {
+      pushTools.innerHTML = '';
+      return;
+    }
+
+    pushTools.innerHTML = `
+      <button type="button" id="nav-push-toggle" class="nav-button">
+        Memuat Notifikasi
+      </button>
+    `;
+
+    const toggleButton = document.getElementById('nav-push-toggle');
+
+    try {
+      const updateButton = async () => {
+        const isSubscribed = await pushManager.isSubscribed();
+        toggleButton.textContent = isSubscribed ? 'Nonaktifkan Notifikasi' : 'Aktifkan Notifikasi';
+        toggleButton.setAttribute(
+          'aria-label',
+          isSubscribed ? 'Nonaktifkan notifikasi push' : 'Aktifkan notifikasi push'
+        );
+      };
+
+      await updateButton();
+
+      toggleButton.addEventListener('click', async () => {
+        toggleButton.disabled = true;
+        toggleButton.textContent = 'Memproses...';
+
+        try {
+          await pushManager.toggleSubscription();
+          await updateButton();
+        } catch (error) {
+          console.error('Error toggling push notification:', error);
+          toggleButton.textContent = 'Gagal Notifikasi';
+        } finally {
+          toggleButton.disabled = false;
+        }
+      });
+    } catch (error) {
+      console.error('Error preparing push notification button:', error);
+      pushTools.innerHTML = '';
     }
   }
 

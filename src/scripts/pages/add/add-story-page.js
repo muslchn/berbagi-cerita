@@ -42,7 +42,7 @@ export default class AddStoryPage {
           </div>
           
           <div class="form-group">
-            <label for="camera">Ambil Foto dari Kamera:</label>
+            <label for="camera-button">Ambil Foto dari Kamera:</label>
             <button type="button" id="camera-button" class="btn-secondary">
               Buka Kamera
             </button>

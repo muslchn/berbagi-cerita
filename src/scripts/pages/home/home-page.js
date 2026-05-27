@@ -3,28 +3,32 @@ import storyDB from '../../data/indexeddb';
 import { escapeHTML } from '../../utils';
 
 export default class HomePage {
+  #stories = [];
+
   async render() {
     return `
       <section class="container home-container">
         <h1 class="page-title">Berbagi Cerita</h1>
         <p class="page-subtitle">Temukan cerita dari berbagai tempat</p>
         
-        <div class="story-controls" style="margin-bottom: 1rem; display: flex; gap: 0.5rem; flex-wrap: wrap;">
-          <input 
-            type="text" 
-            id="search-input" 
-            placeholder="Cari cerita..." 
-            style="flex: 1; min-width: 200px; padding: 0.5rem; border: 2px solid #ddd; border-radius: 4px;"
-          />
-          <select 
-            id="sort-select" 
-            style="padding: 0.5rem; border: 2px solid #ddd; border-radius: 4px;"
-          >
-            <option value="createdAt-desc">Terbaru</option>
-            <option value="createdAt-asc">Terlama</option>
-            <option value="name-asc">Nama A-Z</option>
-            <option value="name-desc">Nama Z-A</option>
-          </select>
+        <div class="story-controls">
+          <div class="story-control-field">
+            <label for="search-input">Cari cerita</label>
+            <input 
+              type="text" 
+              id="search-input" 
+              placeholder="Cari cerita..." 
+            />
+          </div>
+          <div class="story-control-field">
+            <label for="sort-select">Urutkan cerita</label>
+            <select id="sort-select">
+              <option value="createdAt-desc">Terbaru</option>
+              <option value="createdAt-asc">Terlama</option>
+              <option value="name-asc">Nama A-Z</option>
+              <option value="name-desc">Nama Z-A</option>
+            </select>
+          </div>
         </div>
         
         <h2 class="stories-heading">Daftar Cerita Terbaru</h2>
@@ -50,8 +54,7 @@ export default class HomePage {
     // Initialize IndexedDB
     await storyDB.init();
     
-    // Load stories from API and cache to IndexedDB
-    await this.loadAndCacheStories();
+    await this.loadStories();
     
     // Setup search and sort controls
     this.setupControls();
@@ -60,20 +63,11 @@ export default class HomePage {
     this.setupNetworkListeners();
   }
 
-  async loadAndCacheStories() {
+  async loadStories() {
     const storiesList = document.getElementById('stories-list');
     const offlineIndicator = document.getElementById('offline-indicator');
     
     try {
-      // Check network status
-      if (!navigator.onLine) {
-        // Load from IndexedDB when offline
-        offlineIndicator.style.display = 'block';
-        await this.loadStoriesFromIndexedDB();
-        return;
-      }
-      
-      // Fetch from API when online
       const result = await getStories(1);
       
       if (result.error) {
@@ -86,43 +80,40 @@ export default class HomePage {
         return;
       }
       
-      // Cache stories to IndexedDB
-      for (const story of result.listStory) {
-        await storyDB.addStory(story);
-      }
-      
-      // Display stories
-      this.displayStories(result.listStory);
+      offlineIndicator.style.display = 'none';
+      this.#stories = result.listStory;
+      await this.displayStories(result.listStory);
       
     } catch (error) {
       console.error('Error fetching stories:', error);
       
-      // Fallback to IndexedDB on error
       offlineIndicator.style.display = 'block';
-      await this.loadStoriesFromIndexedDB();
+      await this.loadSavedStoriesFallback();
     }
   }
 
-  async loadStoriesFromIndexedDB() {
+  async loadSavedStoriesFallback() {
     const storiesList = document.getElementById('stories-list');
     
     try {
-      const stories = await storyDB.getAllStories();
+      const stories = await storyDB.getSavedStories({ sortBy: 'createdAt', order: 'desc' });
       
       if (!stories || stories.length === 0) {
-        storiesList.innerHTML = '<p class="empty-text">Tidak ada cerita tersimpan. Silakan terhubung ke internet.</p>';
+        storiesList.innerHTML = '<p class="empty-text">Tidak ada cerita tersimpan di perangkat ini.</p>';
         return;
       }
       
-      this.displayStories(stories);
+      this.#stories = stories;
+      await this.displayStories(stories);
     } catch (error) {
       console.error('Error loading from IndexedDB:', error);
-      storiesList.innerHTML = '<p class="error-text">Gagal memuat data offline</p>';
+      storiesList.innerHTML = '<p class="error-text">Gagal memuat cerita tersimpan</p>';
     }
   }
 
-  displayStories(stories) {
+  async displayStories(stories) {
     const storiesList = document.getElementById('stories-list');
+    const savedStoryIds = new Set((await storyDB.getSavedStories()).map((story) => story.id));
     
     storiesList.innerHTML = stories.map(story => `
       <article class="story-card">
@@ -131,9 +122,51 @@ export default class HomePage {
           <h3>${escapeHTML(story.name)}</h3>
           <p>${escapeHTML(story.description)}</p>
           <small class="story-date">${new Date(story.createdAt).toLocaleDateString('id-ID')}</small>
+          <button
+            type="button"
+            class="btn-save-story ${savedStoryIds.has(story.id) ? 'saved' : ''}"
+            data-story-id="${escapeHTML(story.id)}"
+          >
+            ${savedStoryIds.has(story.id) ? 'Hapus dari Tersimpan' : 'Simpan Cerita'}
+          </button>
         </div>
       </article>
     `).join('');
+
+    this.setupSaveButtons();
+  }
+
+  setupSaveButtons() {
+    document.querySelectorAll('.btn-save-story').forEach((button) => {
+      button.addEventListener('click', async () => {
+        const storyId = button.dataset.storyId;
+        const story = this.#stories.find((item) => item.id === storyId);
+
+        if (!story) {
+          return;
+        }
+
+        button.disabled = true;
+
+        try {
+          const savedStory = await storyDB.getSavedStoryById(storyId);
+
+          if (savedStory) {
+            await storyDB.deleteSavedStory(storyId);
+            button.textContent = 'Simpan Cerita';
+            button.classList.remove('saved');
+          } else {
+            await storyDB.saveStory(story);
+            button.textContent = 'Hapus dari Tersimpan';
+            button.classList.add('saved');
+          }
+        } catch (error) {
+          console.error('Error toggling saved story:', error);
+        } finally {
+          button.disabled = false;
+        }
+      });
+    });
   }
 
   setupControls() {
@@ -168,8 +201,35 @@ export default class HomePage {
       order: order
     };
     
-    const filteredStories = await storyDB.getAllStories(options);
-    this.displayStories(filteredStories);
+    let filteredStories = [...this.#stories];
+
+    if (options.search) {
+      const searchTerm = options.search.toLowerCase();
+      filteredStories = filteredStories.filter((story) =>
+        story.name.toLowerCase().includes(searchTerm) ||
+        story.description.toLowerCase().includes(searchTerm)
+      );
+    }
+
+    filteredStories.sort((a, b) => {
+      let valA = a[sortBy];
+      let valB = b[sortBy];
+
+      if (sortBy === 'createdAt') {
+        valA = new Date(valA).getTime();
+        valB = new Date(valB).getTime();
+      }
+
+      if (typeof valA === 'string' && typeof valB === 'string') {
+        return order === 'asc'
+          ? valA.localeCompare(valB, 'id-ID')
+          : valB.localeCompare(valA, 'id-ID');
+      }
+
+      return order === 'asc' ? valA - valB : valB - valA;
+    });
+
+    await this.displayStories(filteredStories);
   }
 
   setupNetworkListeners() {
@@ -179,7 +239,7 @@ export default class HomePage {
       if (offlineIndicator) {
         offlineIndicator.style.display = 'none';
       }
-      this.loadAndCacheStories();
+      this.loadStories();
     });
     
     window.addEventListener('offline', () => {
@@ -188,7 +248,7 @@ export default class HomePage {
       if (offlineIndicator) {
         offlineIndicator.style.display = 'block';
       }
-      this.loadStoriesFromIndexedDB();
+      this.loadSavedStoriesFallback();
     });
   }
 }
