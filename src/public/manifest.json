@@ -1,0 +1,44 @@
+{
+  "name": "Berbagi Cerita - Aplikasi Berbagi Pengalaman",
+  "short_name": "BerbagiCerita",
+  "description": "Platform berbagi pengalaman perjalanan dari berbagai lokasi dengan peta interaktif",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#f5f5f5",
+  "theme_color": "#2c3e50",
+  "orientation": "portrait-primary",
+  "scope": "./",
+  "lang": "id-ID",
+  "dir": "ltr",
+  "categories": ["travel", "social", "photography"],
+  "icons": [
+    {
+      "src": "./favicon.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "./favicon.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Tambah Cerita",
+      "short_name": "Tambah",
+      "description": "Bagikan pengalaman baru Anda",
+      "url": "./#/add",
+      "icons": [{ "src": "./favicon.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Lihat Peta",
+      "short_name": "Peta",
+      "description": "Jelajahi cerita berdasarkan lokasi",
+      "url": "./#/map",
+      "icons": [{ "src": "./favicon.png", "sizes": "192x192" }]
+    }
+  ]
+}

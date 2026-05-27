@@ -8,9 +8,8 @@ const BASE_URL = new URL('./', self.location).href;
 const STATIC_ASSETS = [
   BASE_URL,
   new URL('index.html', self.location).href,
-  new URL('scripts/index.js', self.location).href,
-  new URL('styles/styles.css', self.location).href,
-  new URL('favicon.png', self.location).href
+  new URL('manifest.json', self.location).href,
+  new URL('favicon.png', self.location).href,
 ];
 
 const API_CACHE_NAME = 'berbagi-cerita-api-v1';
@@ -77,6 +76,10 @@ self.addEventListener('fetch', (event) => {
  * Handle API requests with network-first, fallback to cache
  */
 async function handleApiRequest(request) {
+  if (request.method !== 'GET') {
+    return fetch(request);
+  }
+
   const cache = await caches.open(API_CACHE_NAME);
   
   try {
@@ -152,7 +155,7 @@ async function handleStaticRequest(request) {
   } catch (error) {
     // Return offline page for navigation requests
     if (request.mode === 'navigate') {
-      return caches.match(new URL('index.html', self.location).href);
+      return caches.match(BASE_URL) || caches.match(new URL('index.html', self.location).href);
     }
     throw error;
   }
@@ -235,7 +238,7 @@ self.addEventListener('message', (event) => {
  */
 async function cacheApiData(data) {
   const cache = await caches.open(API_CACHE_NAME);
-  const request = new Request('/v1/stories');
+  const request = new Request('https://story-api.dicoding.dev/v1/stories');
   const response = new Response(JSON.stringify(data), {
     headers: { 'Content-Type': 'application/json' }
   });

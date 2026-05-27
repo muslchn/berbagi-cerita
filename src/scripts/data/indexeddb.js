@@ -101,6 +101,12 @@ class StoryDatabase {
               valA = new Date(valA).getTime();
               valB = new Date(valB).getTime();
             }
+
+            if (typeof valA === 'string' && typeof valB === 'string') {
+              return order === 'asc'
+                ? valA.localeCompare(valB, 'id-ID')
+                : valB.localeCompare(valA, 'id-ID');
+            }
             
             return order === 'asc' ? valA - valB : valB - valA;
           });
@@ -172,7 +178,7 @@ class StoryDatabase {
     await this.ensureInitialized();
     
     const pendingStory = {
-      ...storyData,
+      data: storyData,
       timestamp: Date.now(),
       status: 'pending'
     };

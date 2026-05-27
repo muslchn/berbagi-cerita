@@ -1,5 +1,6 @@
 import { addStory } from '../../data/api';
 import storyDB from '../../data/indexeddb';
+import { escapeHTML, loadLeaflet } from '../../utils';
 
 export default class AddStoryPage {
   async render() {
@@ -9,7 +10,7 @@ export default class AddStoryPage {
         <p class="page-subtitle">Bagikan pengalaman Anda</p>
         
         <div id="sync-status" style="background: #d4edda; color: #155724; padding: 0.75rem; border-radius: 4px; margin-bottom: 1rem; display: none;">
-          ✓ Online - Data akan langsung disimpan ke server
+          Online - Data akan langsung disimpan ke server
         </div>
         
         <form id="add-story-form" class="story-form" enctype="multipart/form-data">
@@ -65,7 +66,7 @@ export default class AddStoryPage {
               type="number" 
               id="latitude" 
               name="latitude" 
-              step="-90..90" 
+              step="any"
               min="-90" 
               max="90"
               required
@@ -81,7 +82,7 @@ export default class AddStoryPage {
               type="number" 
               id="longitude" 
               name="longitude" 
-              step="-180..180" 
+              step="any"
               min="-180" 
               max="180"
               required
@@ -118,23 +119,12 @@ export default class AddStoryPage {
     // Initialize IndexedDB
     await storyDB.init();
     
-    // Load Leaflet CSS and JS dynamically
-    const leafletCSS = document.createElement('link');
-    leafletCSS.rel = 'stylesheet';
-    leafletCSS.href = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css';
-    leafletCSS.integrity = 'sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=';
-    leafletCSS.crossOrigin = 'anonymous';
-    document.head.appendChild(leafletCSS);
-
-    const leafletJS = document.createElement('script');
-    leafletJS.src = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js';
-    leafletJS.integrity = 'sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=';
-    leafletJS.crossOrigin = 'anonymous';
-    document.head.appendChild(leafletJS);
-
-    leafletJS.onload = () => {
+    try {
+      await loadLeaflet();
       this.initializeMiniMap();
-    };
+    } catch (error) {
+      this.showMessage(error.message, 'error');
+    }
 
     // Setup form submission
     const form = document.getElementById('add-story-form');
@@ -150,22 +140,37 @@ export default class AddStoryPage {
     
     // Setup network listeners
     this.setupNetworkListeners();
+    this.updateSyncStatus();
     
     // Display pending stories if any
     await this.displayPendingStories();
   }
 
-  setupNetworkListeners() {
+  updateSyncStatus() {
     const syncStatus = document.getElementById('sync-status');
-    
+
+    if (!syncStatus) {
+      return;
+    }
+
+    syncStatus.style.display = 'block';
+
+    if (navigator.onLine) {
+      syncStatus.textContent = 'Online - Data akan langsung disimpan ke server';
+      syncStatus.style.background = '#d4edda';
+      syncStatus.style.color = '#155724';
+      return;
+    }
+
+    syncStatus.textContent = 'Offline - Data akan disimpan lokal dan disinkronkan nanti';
+    syncStatus.style.background = '#fff3cd';
+    syncStatus.style.color = '#856404';
+  }
+
+  setupNetworkListeners() {
     window.addEventListener('online', () => {
       console.log('[AddStory] Back online');
-      if (syncStatus) {
-        syncStatus.style.display = 'block';
-        syncStatus.textContent = '✓ Online - Data akan langsung disimpan ke server';
-        syncStatus.style.background = '#d4edda';
-        syncStatus.style.color = '#155724';
-      }
+      this.updateSyncStatus();
       
       // Sync pending stories
       this.syncPendingStories();
@@ -173,12 +178,7 @@ export default class AddStoryPage {
     
     window.addEventListener('offline', () => {
       console.log('[AddStory] Went offline');
-      if (syncStatus) {
-        syncStatus.style.display = 'block';
-        syncStatus.textContent = '️ Offline - Data akan disimpan lokal dan disinkronkan nanti';
-        syncStatus.style.background = '#fff3cd';
-        syncStatus.style.color = '#856404';
-      }
+      this.updateSyncStatus();
     });
   }
 
@@ -189,15 +189,23 @@ export default class AddStoryPage {
     try {
       const pendingStories = await storyDB.getPendingStories();
       
-      if (pendingStories && pendingStories.length > 0) {
-        pendingSection.style.display = 'block';
-        pendingList.innerHTML = pendingStories.map(story => `
+      if (!pendingStories || pendingStories.length === 0) {
+        pendingSection.style.display = 'none';
+        pendingList.innerHTML = '';
+        return;
+      }
+
+      pendingSection.style.display = 'block';
+      pendingList.innerHTML = pendingStories.map((story) => {
+        const storyData = story.data || story;
+
+        return `
           <li style="padding: 0.5rem; background: #f8f9fa; margin-bottom: 0.5rem; border-radius: 4px;">
-            <strong>${story.description.substring(0, 50)}...</strong>
+            <strong>${escapeHTML(storyData.description.substring(0, 50))}...</strong>
             <small style="color: #7f8c8d;"> - ${new Date(story.timestamp).toLocaleString('id-ID')}</small>
           </li>
-        `).join('');
-      }
+        `;
+      }).join('');
     } catch (error) {
       console.error('Error displaying pending stories:', error);
     }
@@ -215,7 +223,8 @@ export default class AddStoryPage {
       
       for (const pendingStory of pendingStories) {
         try {
-          const result = await addStory(pendingStory.data);
+          const storyData = pendingStory.data || pendingStory;
+          const result = await addStory(storyData);
           
           if (!result.error) {
             // Remove from pending after successful sync
@@ -331,8 +340,8 @@ export default class AddStoryPage {
   validateForm() {
     const description = document.getElementById('description').value.trim();
     const photo = document.getElementById('photo').files[0];
-    const latitude = document.getElementById('latitude').value;
-    const longitude = document.getElementById('longitude').value;
+    const latitude = Number(document.getElementById('latitude').value);
+    const longitude = Number(document.getElementById('longitude').value);
     
     let isValid = true;
     
@@ -349,7 +358,7 @@ export default class AddStoryPage {
       isValid = false;
     }
     
-    if (!latitude || !longitude) {
+    if (!Number.isFinite(latitude) || !Number.isFinite(longitude)) {
       this.showMessage('Silakan pilih lokasi pada peta', 'error');
       isValid = false;
     }
@@ -367,15 +376,13 @@ export default class AddStoryPage {
     const submitButton = e.target.querySelector('button[type="submit"]');
     submitButton.disabled = true;
     submitButton.textContent = 'Menyimpan...';
+    const description = document.getElementById('description').value.trim();
+    const photo = document.getElementById('photo').files[0];
+    const lat = parseFloat(document.getElementById('latitude').value);
+    const lon = parseFloat(document.getElementById('longitude').value);
+    const storyData = { description, lat, lon, photo };
     
     try {
-      const description = document.getElementById('description').value.trim();
-      const photo = document.getElementById('photo').files[0];
-      const lat = parseFloat(document.getElementById('latitude').value);
-      const lon = parseFloat(document.getElementById('longitude').value);
-      
-      const storyData = { description, lat, lon, photo };
-      
       // Check if online
       if (navigator.onLine) {
         // Submit directly to API

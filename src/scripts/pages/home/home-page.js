@@ -1,5 +1,6 @@
 import { getStories } from '../../data/api';
 import storyDB from '../../data/indexeddb';
+import { escapeHTML } from '../../utils';
 
 export default class HomePage {
   async render() {
@@ -33,13 +34,19 @@ export default class HomePage {
         </div>
         
         <div id="offline-indicator" style="display: none; background: #fff3cd; color: #856404; padding: 1rem; border-radius: 4px; margin-top: 1rem;">
-          ⚠️ Mode Offline - Menampilkan data yang tersimpan di perangkat
+          Mode Offline - Menampilkan data yang tersimpan di perangkat
         </div>
       </section>
     `;
   }
 
   async afterRender() {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      window.location.hash = '#/login';
+      return;
+    }
+
     // Initialize IndexedDB
     await storyDB.init();
     
@@ -119,10 +126,10 @@ export default class HomePage {
     
     storiesList.innerHTML = stories.map(story => `
       <article class="story-card">
-        <img src="${story.photoUrl}" alt="${story.description.substring(0, 50)}" loading="lazy" />
+        <img src="${escapeHTML(story.photoUrl)}" alt="${escapeHTML(story.description.substring(0, 50))}" loading="lazy" />
         <div class="story-content">
-          <h3>${story.name}</h3>
-          <p>${story.description}</p>
+          <h3>${escapeHTML(story.name)}</h3>
+          <p>${escapeHTML(story.description)}</p>
           <small class="story-date">${new Date(story.createdAt).toLocaleDateString('id-ID')}</small>
         </div>
       </article>

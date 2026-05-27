@@ -63,7 +63,12 @@ class App {
 
   async renderPage() {
     const url = getActiveRoute();
-    const page = routes[url];
+    const page = routes[url] || routes['/'];
+
+    if (!routes[url]) {
+      window.location.hash = '#/';
+      return;
+    }
 
     // Add view transition
     if (document.startViewTransition) {

@@ -6,7 +6,7 @@ import fs from 'fs';
 export default defineConfig({
   base: './',
   root: resolve(__dirname, 'src'),
-  publicDir: resolve(__dirname, 'public'), // Changed to root public directory for manifest.json
+  publicDir: resolve(__dirname, 'src/public'),
   build: {
     outDir: resolve(__dirname, 'dist'),
     emptyOutDir: true,

@@ -1,355 +1,233 @@
-# Berbagi Cerita - Aplikasi Berbagi Pengalaman
+# Berbagi Cerita
 
-Aplikasi web Single Page Application (SPA) dan Progressive Web App (PWA) untuk berbagi cerita dan pengalaman dari berbagai tempat. Dibuat sebagai submission untuk kelas Dicoding Academy "Belajar Pengembangan Web Intermediate".
+Berbagi Cerita adalah aplikasi web Single Page Application (SPA) dan Progressive Web App (PWA) untuk membagikan cerita lengkap dengan foto dan lokasi. Aplikasi ini dibuat untuk submission kelas Dicoding "Belajar Pengembangan Web Intermediate" dan menggunakan Dicoding Story API.
 
-## 📋 Informasi Aplikasi
+## Informasi Aplikasi
 
-- **Nama:** Berbagi Cerita
-- **Tema:** Platform berbagi pengalaman perjalanan dari berbagai lokasi
-- **API:** [Dicoding Story API](https://story-api.dicoding.dev/v1/)
-- **Layanan Peta:** OpenStreetMap & Esri Satellite (tanpa API key)
-- **URL Demo:** `http://localhost:5173/` (development)
-- **URL Production:** *[Tambahkan URL deployment setelah deploy]*
+- Nama aplikasi: Berbagi Cerita
+- Jenis aplikasi: SPA, PWA, dan aplikasi peta interaktif
+- API utama: https://story-api.dicoding.dev/v1
+- Map provider: OpenStreetMap dan Esri World Imagery melalui Leaflet
+- Development URL: http://localhost:5173/
+- Production URL: https://muslchn.github.io/berbagi-cerita/
 
-## ✨ Fitur yang Diimplementasikan
+## Fitur Utama
 
-### 1. SPA & Transisi Halaman (Advance) ✅
-- ✅ Single-Page Application dengan hash routing
-- ✅ Navigasi tanpa reload halaman
-- ✅ View Transitions API untuk transisi halus antar halaman
-- ✅ Pemisahan halaman authentication (login/register) dan homepage
+- Autentikasi pengguna dengan register, login, logout, dan route protection.
+- Daftar cerita dari Dicoding Story API dengan foto, nama, deskripsi, dan tanggal.
+- Peta interaktif berisi marker cerita yang memiliki koordinat.
+- Layer peta OpenStreetMap dan Satellite.
+- Form tambah cerita dengan upload foto, kamera, deskripsi, dan pemilihan titik lokasi dari mini map.
+- View Transitions API dengan fallback untuk browser yang belum mendukung.
+- Aksesibilitas dasar: skip link, semantic HTML, label form, alt text, ARIA, dan keyboard-friendly navigation.
+- PWA: manifest, service worker, installable app, app-shell cache, image cache, dan offline fallback.
+- IndexedDB untuk cache daftar cerita, pencarian, pengurutan, dan antrean cerita pending saat offline.
+- Push notification menggunakan Web Push API dan endpoint subscription Dicoding Story API.
 
-### 2. Data & Marker Peta (Advance) ✅
-- ✅ Menampilkan data dari API (foto, nama, deskripsi, tanggal)
-- ✅ Interactive map dengan Leaflet.js dan markers
-- ✅ Multiple tile layers (OpenStreetMap & Satellite)
-- ✅ Layer control untuk berganti tampilan peta
-- ✅ Sinkronisasi list dan peta (klik list → zoom ke lokasi)
-- ✅ Popup marker menampilkan detail cerita
+## Kriteria Submission
 
-### 3. Fitur Tambah Data (Advance) ✅
-- ✅ Form tambah cerita dengan upload file
-- ✅ Pemilihan lokasi via mini-map interaktif
-- ✅ HTTP Request asynchronous ke API
-- ✅ Validasi input yang jelas dan user-friendly
-- ✅ Camera capture menggunakan MediaDevices API
-- ✅ Media stream ditutup setelah digunakan
-- ✅ Feedback pesan sukses/error yang informatif
+### Submission 1
 
-### 4. Aksesibilitas (Advance) ✅
-- ✅ Skip to content link
-- ✅ Semantic HTML elements (`<header>`, `<main>`, `<article>`, dll.)
-- ✅ Labels pada semua form inputs
-- ✅ Alt text pada semua gambar
-- ✅ Responsive design (mobile, tablet, desktop)
-- ✅ Keyboard navigation support
-- ✅ ARIA attributes untuk screen readers
+- SPA dan transisi halaman.
+- Menampilkan data cerita dan marker pada peta.
+- Menambahkan data baru melalui form.
+- Aksesibilitas sesuai kebutuhan submission.
 
-### 5. Push Notification (Submission V2) ✅
-- ✅ Web Push API integration dengan VAPID keys
-- ✅ Subscribe/unsubscribe push notifications
-- ✅ Toggle button di halaman About
-- ✅ Dynamic notification content (title, icon, message)
-- ✅ Notification actions untuk navigasi ke story detail
-- ✅ Server-side subscription management
+### Submission 2
 
-### 6. Progressive Web App (Submission V2) ✅
-- ✅ Installable app (Add to Home Screen)
-- ✅ Service Worker dengan caching strategies
-- ✅ Offline support untuk app shell
-- ✅ Web App Manifest dengan screenshots dan shortcuts
-- ✅ Theme color dan status bar customization
-- ✅ Automatic update detection
+- Mempertahankan seluruh kriteria submission sebelumnya.
+- Menerapkan push notification.
+- Menerapkan PWA dengan manifest dan service worker.
+- Menerapkan IndexedDB untuk penyimpanan lokal.
+- Mendukung distribusi publik melalui GitHub Pages.
 
-### 7. IndexedDB & Offline Sync (Submission V2) ✅
-- ✅ CRUD operations menggunakan IndexedDB
-- ✅ Filter, search, dan sort pada data offline
-- ✅ Offline-first architecture
-- ✅ Automatic sync saat kembali online
-- ✅ Pending queue untuk operasi offline
-- ✅ Network status detection
+## Teknologi
 
-## 🧪 Panduan Testing
+- Vanilla JavaScript ES Modules
+- HTML5 dan CSS3
+- Vite 6
+- Leaflet 1.9.4
+- Dicoding Story API
+- Service Worker API
+- Web App Manifest
+- IndexedDB
+- Web Push API
+- MediaDevices API
+- View Transitions API
 
-### Prasyarat
-1. Install dependencies: `npm install`
-2. Jalankan development server: `npm run dev`
-3. Buka browser di `http://localhost:5173/`
+## Struktur Proyek
 
-### Skenario Testing
-
-#### 1. Registrasi & Login
-- [ ] Buka halaman registrasi (`#/register`)
-- [ ] Isi form dengan data dummy (nama, email valid, password minimal 8 karakter)
-- [ ] Klik tombol daftar dan pastikan mendapat pesan sukses
-- [ ] Login dengan akun yang baru didaftarkan
-- [ ] Verifikasi redirect otomatis ke homepage setelah login
-
-#### 2. Melihat Daftar Cerita
-- [ ] Setelah login, homepage otomatis menampilkan daftar cerita dari API
-- [ ] Pastikan foto, nama, deskripsi, dan tanggal ditampilkan dengan benar
-- [ ] Test responsive design dengan resize browser window
-
-#### 3. Peta Interaktif
-- [ ] Klik menu "Peta" untuk navigasi ke halaman peta
-- [ ] Verifikasi marker muncul di lokasi cerita yang memiliki koordinat
-- [ ] Gunakan layer control (pojok kanan atas) untuk ganti antara OpenStreetMap dan Satellite
-- [ ] Klik salah satu cerita di list bawah peta
-- [ ] Verifikasi peta zoom ke lokasi cerita tersebut dan popup terbuka
-- [ ] Klik marker pada peta untuk melihat detail cerita
-
-#### 4. Tambah Cerita Baru
-- [ ] Pastikan sudah login (jika belum, akan redirect ke login)
-- [ ] Klik menu "Tambah Cerita"
-- [ ] Isi deskripsi cerita (minimal 1 karakter)
-- [ ] Upload foto ATAU klik "Buka Kamera" untuk capture langsung
-  - Untuk kamera: izinkan akses kamera, ambil foto, preview muncul
-- [ ] Klik pada mini-map untuk memilih lokasi (latitude & longitude terisi otomatis)
-- [ ] Klik "Tambah Cerita"
-- [ ] Verifikasi pesan sukses muncul
-- [ ] Verifikasi redirect ke homepage setelah 2 detik
-- [ ] Cek cerita baru muncul di daftar
-
-#### 5. Aksesibilitas
-- [ ] Tekan Tab saat pertama kali load page → verifikasi skip link muncul
-- [ ] Navigasi seluruh aplikasi hanya dengan keyboard (Tab, Enter, Escape)
-- [ ] Gunakan screen reader (opsional) untuk verifikasi ARIA labels
-- [ ] Resize browser ke berbagai ukuran:
-  - Mobile: 375px
-  - Tablet: 768px
-  - Desktop: 1024px+
-- [ ] Verifikasi layout tetap rapi di semua ukuran layar
-
-#### 6. Logout & Protected Routes
-- [ ] Klik tombol logout (jika ada di UI)
-- [ ] Coba akses `#/add` tanpa login
-- [ ] Verifikasi redirect otomatis ke halaman login
-
-#### 7. Push Notification (V2)
-- [ ] Buka halaman About (`#/about`)
-- [ ] Klik tombol "Aktifkan Notifikasi"
-- [ ] Izinkan notifikasi di browser prompt
-- [ ] Verifikasi status berubah menjadi "✓ Notifikasi aktif"
-- [ ] Buat cerita baru untuk trigger notifikasi
-- [ ] Verifikasi notifikasi muncul dengan judul, icon, dan pesan yang benar
-- [ ] Klik action "Lihat Cerita" pada notifikasi
-- [ ] Verifikasi navigasi ke halaman yang sesuai
-- [ ] Klik tombol "Nonaktifkan Notifikasi"
-- [ ] Verifikasi status berubah menjadi "✗ Notifikasi nonaktif"
-
-#### 8. PWA Installability (V2)
-- [ ] Buka aplikasi di Chrome/Edge mobile atau desktop
-- [ ] Verifikasi install prompt muncul (Add to Home Screen)
-- [ ] Install aplikasi
-- [ ] Verifikasi app terbuka dalam mode standalone (tanpa browser chrome)
-- [ ] Verifikasi theme color terlihat di status bar
-- [ ] Long press app icon → verifikasi shortcuts muncul (Tambah Cerita, Lihat Peta)
-
-#### 9. Offline Support (V2)
-- [ ] Buka DevTools → Network tab → set throttling ke "Offline"
-- [ ] Reload halaman
-- [ ] Verifikasi app shell masih tampil (header, navigation, layout)
-- [ ] Verifikasi indikator offline muncul di homepage
-- [ ] Verifikasi cerita yang sudah di-cache masih terlihat
-- [ ] Test search dan sort saat offline
-- [ ] Koneksi kembali online (set Network ke "Online")
-- [ ] Verifikasi data refresh otomatis
-
-#### 10. IndexedDB Operations (V2)
-- [ ] Buka DevTools → Application → IndexedDB → BerbagiCeritaDB
-- [ ] Verifikasi object store "stories" ada
-- [ ] Verifikasi stories tersimpan setelah load dari API
-- [ ] Test search functionality → verifikasi filter bekerja
-- [ ] Test sort functionality → verifikasi sorting bekerja
-- [ ] Tambah cerita baru saat offline
-- [ ] Verifikasi cerita masuk ke "pendingStories" store
-- [ ] Kembali online
-- [ ] Verifikasi pending story ter-sync dan dihapus dari pending store
-- [ ] Verifikasi story baru muncul di "stories" store
-
-## 🛠️ Teknologi & Dependencies
-
-### Core Technologies
-- **Vanilla JavaScript** - ES6+ modules, async/await
-- **HTML5** - Semantic elements, forms, media devices
-- **CSS3** - Custom properties, flexbox, grid, media queries
-
-### Libraries & APIs
-- **Leaflet.js 1.9.4** - Interactive maps library
-- **Dicoding Story API** - Backend REST API dengan Web Push support
-- **Vite 6.2.0** - Build tool & development server
-- **View Transitions API** - Native page transitions
-- **MediaDevices API** - Camera access for photo capture
-- **Web Components** - Custom Elements architecture
-
-### PWA Technologies (V2)
-- **Service Worker API** - Caching, offline support, background sync
-- **Web App Manifest** - Installable app configuration
-- **IndexedDB API** - Client-side database untuk offline storage
-- **Web Push API** - Server-initiated notifications
-- **Cache API** - HTTP response caching
-- **Notification API** - User notification display
-
-### Build & Development
-```json
-{
-  "dev": "vite",
-  "build": "vite build",
-  "preview": "vite preview"
-}
-```
-
-## 📁 Struktur Proyek
-
-```
+```text
 berbagi-cerita/
-├── public/
-│   ├── manifest.json               # Web App Manifest (V2)
-│   └── icons/                      # PWA icons
-│       ├── icon-192x192.png
-│       └── icon-512x512.png
+├── .github/workflows/deploy.yml       # Workflow deploy GitHub Pages
 ├── src/
-│   ├── sw.js                       # Service Worker (V2)
+│   ├── index.html                     # Template HTML utama
+│   ├── sw.js                          # Service worker
+│   ├── public/
+│   │   ├── favicon.png                # Ikon aplikasi
+│   │   ├── manifest.json              # Web app manifest
+│   │   └── images/logo.png            # Asset publik
 │   ├── scripts/
+│   │   ├── config.js                  # Konfigurasi API
+│   │   ├── index.js                   # Entry point aplikasi
 │   │   ├── data/
-│   │   │   ├── api.js              # API integration layer
-│   │   │   └── indexeddb.js        # IndexedDB wrapper (V2)
-│   │   ├── pages/
-│   │   │   ├── home/
-│   │   │   │   └── home-page.js    # Homepage component
-│   │   │   ├── map/
-│   │   │   │   ── map-page.js     # Interactive map page
-│   │   │   ├── add/
-│   │   │   │   └── add-story-page.js # Add story form
-│   │   │   ├── auth/
-│   │   │   │   ├── login-page.js   # Login component
-│   │   │   │   └── register-page.js # Registration component
-│   │   │   ├── about/
-│   │   │   │   └── about-page.js   # About page
-│   │   │   └── app.js              # Main App controller
-│   │   ├── routes/
-│   │   │   ├── routes.js           # Route definitions
-│   │   │   └── url-parser.js       # URL parsing utility
-│   │   ├── utils/
-│   │   │   ├── index.js            # Helper functions
-│   │   │   ── push-notification.js # Push notification manager (V2)
-│   │   ├── config.js               # App configuration
-│   │   └── index.js                # Entry point
-│   ├── styles/
-│   │   └── styles.css              # Global styles
-│   └── index.html                  # HTML template with SW registration
+│   │   │   ├── api.js                 # Request ke Dicoding Story API
+│   │   │   └── indexeddb.js           # Helper IndexedDB
+│   │   ├── pages/                     # Halaman SPA
+│   │   ├── routes/                    # Hash router
+│   │   └── utils/                     # Helper umum dan push notification
+│   └── styles/styles.css              # Style global
 ├── package.json
+├── package-lock.json
 ├── vite.config.js
-├── STUDENT.txt                     # Deployment URL & credentials
+├── STUDENT.txt
 └── README.md
 ```
 
-## 🔑 Konfigurasi
+## Instalasi dan Menjalankan Lokal
 
-File konfigurasi berada di `src/scripts/config.js`:
+1. Install dependencies:
 
-```javascript
+```bash
+npm install
+```
+
+2. Jalankan development server:
+
+```bash
+npm run dev
+```
+
+3. Buka aplikasi:
+
+```text
+http://localhost:5173/
+```
+
+## Build dan Preview Production
+
+Build aplikasi:
+
+```bash
+npm run build
+```
+
+Preview hasil build:
+
+```bash
+npm run preview
+```
+
+Output production dibuat di folder `dist/`.
+
+## Deployment
+
+Project ini sudah memiliki GitHub Actions workflow di `.github/workflows/deploy.yml`.
+
+Alur deploy:
+
+- Workflow berjalan saat ada push ke branch `main` atau dijalankan manual dari tab Actions.
+- Dependencies di-install dengan `npm ci`.
+- Aplikasi di-build dengan `npm run build`.
+- Folder `dist/` diunggah ke GitHub Pages.
+
+Pastikan pengaturan repository GitHub Pages menggunakan source "GitHub Actions".
+
+## Konfigurasi
+
+Konfigurasi API berada di `src/scripts/config.js`.
+
+```js
 const CONFIG = {
   BASE_URL: 'https://story-api.dicoding.dev/v1',
 };
 ```
 
-**Catatan:** Aplikasi menggunakan OpenStreetMap yang tidak memerlukan API key.
+Aplikasi tidak membutuhkan API key untuk peta karena menggunakan tile OpenStreetMap dan Esri yang dapat diakses publik.
 
-## ⚠️ Catatan Penting
+## Catatan PWA
 
-### Kompatibilitas Browser
-- **View Transitions API:** Hanya didukung di browser modern (Chrome 111+, Edge 111+)
-  - Fallback tersedia untuk browser lama
-- **MediaDevices API (Kamera):** 
-  - Hanya bekerja di HTTPS atau localhost
-  - Memerlukan izin pengguna
-  - Tidak didukung di beberapa browser lama
-- **GPS Accuracy:** Tergantung pada device dan browser
+- Manifest berada di `src/public/manifest.json`.
+- Service worker berada di `src/sw.js` dan disalin ke `dist/sw.js` saat build.
+- Cache app shell dibuat dari halaman utama, manifest, favicon, dan asset yang dikunjungi.
+- API `GET` menggunakan strategi network-first dengan fallback cache.
+- Gambar menggunakan strategi cache-first.
+- Request non-GET tidak dicache agar proses tambah cerita dan subscription tetap aman.
 
-### Authentication Flow
-- Token disimpan di `localStorage` setelah login berhasil
-- Token otomatis disertakan di header Authorization untuk setiap request ke `/stories`
-- Token dihapus saat logout (jika diimplementasikan)
+## Catatan Offline dan IndexedDB
 
-### Accessibility Features
-- **Skip to Content:** Link tersembunyi yang muncul saat Tab pertama kali ditekan
-  - Langsung memindahkan fokus ke konten utama tanpa mengubah URL
-  - Implementasi menggunakan JavaScript event handler (bukan pure HTML anchor)
-- **Heading Hierarchy:** Struktur heading hierarkis (h1 → h2 → h3) untuk screen readers
-  - Heading section disembunyikan secara visual tapi tetap semantic
-  - Menggunakan "visually hidden" pattern untuk accessibility
+- Database: `BerbagiCeritaDB`
+- Object store:
+  - `stories` untuk cache cerita yang berhasil dimuat.
+  - `pendingStories` untuk cerita yang dibuat saat offline atau saat request gagal.
+- Saat koneksi kembali online, pending story dicoba dikirim kembali ke API.
+- Search dan sort pada homepage dapat menggunakan data yang sudah tersimpan di IndexedDB.
 
-### Performance Considerations
-- Images menggunakan `loading="lazy"` untuk lazy loading
-- Leaflet.js dimuat secara dinamis hanya saat halaman peta diakses
-- Dynamic imports untuk optimasi bundle size
+## Panduan Testing Manual
 
-### Troubleshooting Common Issues
+### Autentikasi
 
-#### Error "Missing authentication" saat mengambil stories
-**Solusi:** Pastikan sudah login dan token tersimpan di localStorage. Cek di DevTools → Application → Local Storage.
+- Buka `#/register`, buat akun dengan email valid dan password minimal 8 karakter.
+- Login melalui `#/login`.
+- Pastikan setelah login diarahkan ke halaman utama.
+- Klik "Keluar" dan pastikan token terhapus serta aplikasi kembali ke beranda/login sesuai route.
 
-#### Kamera tidak berfungsi
-**Solusi:** 
-- Pastikan menggunakan HTTPS atau localhost
-- Izinkan akses kamera di browser settings
-- Coba gunakan browser modern (Chrome, Firefox, Edge terbaru)
+### Daftar Cerita
 
-#### Skip link tidak bekerja
-**Solusi:** Pastikan JavaScript enabled di browser. Skip link memerlukan event handler untuk mencegah navigasi hash.
+- Login terlebih dahulu.
+- Pastikan daftar cerita tampil di halaman utama.
+- Coba search dan sort cerita.
+- Matikan koneksi dari DevTools Network dan pastikan data tersimpan masih dapat tampil jika sudah pernah dimuat.
 
-#### Peta tidak muncul
-**Solusi:** 
-- Periksa koneksi internet (Leaflet.js dimuat dari CDN)
-- Clear browser cache dan reload
-- Cek console untuk error messages
+### Peta
 
-## 🎯 Kriteria Submission Checklist
+- Buka `#/map`.
+- Pastikan peta tampil dan marker muncul untuk cerita yang memiliki koordinat.
+- Coba ganti layer peta.
+- Klik item cerita pada daftar untuk zoom ke marker dan membuka popup.
 
-### Submission V1 (Proyek Pertama) ✅
-Aplikasi ini memenuhi semua kriteria submission pertama:
+### Tambah Cerita
 
-- ✅ **Kriteria 1:** SPA dan Transisi Halaman
-- ✅ **Kriteria 2:** Data dan Marker Pada Peta
-- ✅ **Kriteria 3:** Fitur Tambah Data Baru
-- ✅ **Kriteria 4:** Aksesibilitas sesuai Standar WCAG
+- Buka `#/add` setelah login.
+- Isi deskripsi.
+- Upload foto atau gunakan kamera.
+- Pilih lokasi dari mini map.
+- Submit dan pastikan pesan sukses muncul.
+- Coba mode offline untuk memastikan cerita masuk ke pending queue.
 
-### Submission V2 (Proyek Kedua) ✅
-Aplikasi ini juga memenuhi semua kriteria submission kedua:
+### PWA
 
-- ✅ **Kriteria 1:** Mempertahankan Seluruh Kriteria Wajib Submission Sebelumnya
-- ✅ **Kriteria 2:** Menerapkan Push Notification (Advanced - toggle button + navigation actions)
-- ✅ **Kriteria 3:** Implementasi PWA dengan Dukungan Instalasi dan Mode Offline (Advanced - caching dynamic data)
-- ✅ **Kriteria 4:** Penerapan IndexedDB (Advanced - offline-online synchronization)
-- ✅ **Kriteria 5:** Distribusikan secara Publik (*Pending deployment*)
+- Jalankan aplikasi dari origin HTTPS atau localhost.
+- Buka DevTools Application.
+- Pastikan manifest terbaca.
+- Pastikan service worker aktif.
+- Reload dalam mode offline dan pastikan app shell tetap tampil.
+- Install aplikasi dari browser yang mendukung PWA.
 
-## 📖 Dokumentasi API
+### Push Notification
 
-Endpoint yang digunakan dari [Dicoding Story API](https://story-api.dicoding.dev/v1/):
+- Login terlebih dahulu.
+- Buka halaman `#/about`.
+- Klik "Aktifkan Notifikasi".
+- Izinkan permission notification.
+- Pastikan status berubah menjadi aktif.
+- Klik kembali untuk unsubscribe dan pastikan status nonaktif.
 
-| Method | Endpoint | Deskripsi | Auth Required |
-|--------|----------|-----------|---------------|
-| POST | `/register` | Registrasi user baru | ❌ |
-| POST | `/login` | Login user | ❌ |
-| GET | `/stories` | Ambil daftar cerita | ✅ |
-| POST | `/stories` | Tambah cerita baru | ✅ |
+## Troubleshooting
 
-Untuk dokumentasi lengkap API, kunjungi: https://story-api.dicoding.dev/v1/
+- Jika cerita gagal dimuat dengan pesan autentikasi, login ulang dan pastikan token tersedia di Local Storage.
+- Jika kamera tidak aktif, gunakan HTTPS atau localhost dan izinkan permission kamera di browser.
+- Jika peta tidak tampil, pastikan koneksi internet tersedia karena Leaflet dan map tile dimuat dari CDN/provider eksternal.
+- Jika PWA belum bisa di-install, pastikan aplikasi dijalankan dari HTTPS atau localhost dan service worker sudah terdaftar.
+- Jika deployment GitHub Pages tidak berubah, cek status workflow pada tab Actions dan pastikan Pages source adalah GitHub Actions.
 
-## 🙏 Credits
+## Credits
 
-- **Developer:** Student of Dicoding Academy
-- **Course:** Belajar Pengembangan Web Intermediate
-- **API Provider:** [Dicoding Story API](https://story-api.dicoding.dev/v1/)
-- **Map Library:** [Leaflet.js](https://leafletjs.com/)
-- **Map Tiles:** [OpenStreetMap](https://www.openstreetmap.org/) & [Esri](https://www.esri.com/)
-- **VAPID Public Key:** Provided by Dicoding Story API for push notifications
+- Dicoding Story API: https://story-api.dicoding.dev/v1
+- Leaflet: https://leafletjs.com/
+- OpenStreetMap: https://www.openstreetmap.org/
+- Esri World Imagery: https://www.esri.com/
 
-## 📄 License
+## License
 
-Dibuat untuk tujuan pembelajaran Dicoding Academy.
-
----
-
-**Terima kasih telah menggunakan Berbagi Cerita!** 🎉
+Dibuat untuk tujuan pembelajaran dan submission Dicoding Academy.
